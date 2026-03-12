@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Black Lotus UX — AI-Powered UX Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:           #070708;
+    --surface:      #121214;
+    --border:       rgba(220,220,220,0.07);
+    --border-light: rgba(220,220,220,0.13);
+    --text:         #F0F0EC;
+    --text-2:       #9A9A96;
+    --text-3:       #5A5A58;
+    --silver:       #C8C8C4;
+    --silver-bright:#E8E8E4;
+    --silver-dim:   rgba(200,200,196,0.12);
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body:    'Outfit', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body); font-weight: 300;
+    font-size: 18px; line-height: 1.6; overflow-x: hidden;
+  }
+
+  /* NOISE */
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9000; opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* ── PAGE SYSTEM: CSS :target ──
+     Home shows by default.
+     Any :target page shows; all others hide. */
+  .page { display: none; min-height: 100vh; }
+  #home { display: block; }
+  .page:target { display: block; animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+
+  /* When another page is targeted, hide home */
+  body:has(#services:target) #home,
+  body:has(#about:target)    #home,
+  body:has(#contact:target)  #home { display: none; }
+  /* Hide non-targeted pages when any page is targeted */
+  body:has(#home:target)     #services,
+  body:has(#about:target)    #services,
+  body:has(#contact:target)  #services { display: none; }
+  body:has(#home:target)     #about,
+  body:has(#services:target) #about,
+  body:has(#contact:target)  #about { display: none; }
+  body:has(#home:target)     #contact,
+  body:has(#services:target) #contact,
+  body:has(#about:target)    #contact { display: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 60px;
+    background: rgba(7,7,8,0.93); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
+  .nav-logo img { width: 30px; height: 30px; filter: invert(1) opacity(0.85); }
+  .nav-logo-text { font-family: var(--font-display); font-size: 18px; font-weight: 500; letter-spacing: 0.02em; }
+  .nav-logo-text span { font-weight: 300; color: var(--text-2); }
+  .nav-links { display: flex; align-items: center; gap: 40px; list-style: none; }
+  .nav-links a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-2); text-decoration: none; transition: color 0.2s; position: relative; padding-bottom: 3px;
+  }
+  .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--silver); transition: width 0.3s; }
+  .nav-links a:hover { color: var(--silver-bright); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--bg); background: var(--silver); border: none; padding: 10px 22px;
+    text-decoration: none; display: inline-block; transition: background 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover { background: var(--silver-bright); transform: translateY(-1px); }
+
+  /* ── SHARED ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 60px; }
+
+  .section-label {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--silver); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--silver); }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--bg); background: var(--silver); border: none; padding: 14px 28px;
+    text-decoration: none; cursor: pointer; transition: background 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { background: var(--silver-bright); transform: translateY(-2px); }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-2); background: transparent; border: 1px solid var(--border-light); padding: 14px 28px;
+    text-decoration: none; cursor: pointer; transition: color 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .btn-ghost:hover { color: var(--silver-bright); border-color: var(--silver); transform: translateY(-2px); }
+
+  /* ── FOOTER ── */
+  footer { padding: 56px 60px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .footer-brand { display: flex; align-items: center; gap: 12px; }
+  .footer-brand img { width: 26px; height: 26px; filter: invert(1) opacity(0.7); }
+  .footer-name { font-family: var(--font-display); font-size: 15px; font-weight: 500; }
+  .footer-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.11em; color: var(--text-3); margin-top: 3px; }
+  .footer-links { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+  .footer-links a { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--silver); }
+  .footer-copy { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); letter-spacing: 0.1em; }
+
+  /* ════════════════════════
+     HOME
+  ════════════════════════ */
+  .hero { padding: 160px 60px 100px; position: relative; overflow: hidden; max-width: 1200px; margin: 0 auto; }
+  .hero-lotus {
+    position: absolute; right: -60px; top: 50%; transform: translateY(-50%);
+    width: 600px; height: 600px; opacity: 0.032; pointer-events: none;
+  }
+  .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.15em; color: var(--text-3); margin-bottom: 44px; }
+  .hero-h1 { font-family: var(--font-display); font-size: clamp(66px,9vw,124px); font-weight: 300; line-height: 0.92; letter-spacing: -0.02em; max-width: 840px; margin-bottom: 48px; }
+  .hero-h1 em { font-style: italic; color: var(--text-2); }
+  .hero-rule { width: 100%; height: 1px; background: var(--border); margin-bottom: 48px; }
+  .hero-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+  .hero-desc { max-width: 400px; color: var(--text-2); font-size: 15px; line-height: 1.75; }
+  .hero-btns { display: flex; gap: 14px; flex-shrink: 0; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stat-item { padding: 44px 40px; border-right: 1px solid var(--border); }
+  .stat-item:last-child { border-right: none; }
+  .stat-number { font-family: var(--font-display); font-size: 50px; font-weight: 300; line-height: 1; color: var(--silver-bright); margin-bottom: 7px; }
+  .stat-number sup { font-size: 24px; vertical-align: super; }
+  .stat-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); }
+
+  .svc-preview { padding: 110px 0; }
+  .svc-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 52px; }
+  .svc-title { font-family: var(--font-display); font-size: clamp(38px,5vw,62px); font-weight: 300; line-height: 1.05; }
+  .svc-title em { font-style: italic; color: var(--text-2); }
+  .svc-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1px; background: var(--border); }
+  .svc-card {
+    background: var(--bg); padding: 46px; text-decoration: none; color: inherit;
+    position: relative; overflow: hidden; display: block; transition: background 0.3s;
+  }
+  .svc-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg,transparent,var(--silver),transparent); transform: scaleX(0); transition: transform 0.5s; }
+  .svc-card:hover { background: var(--surface); }
+  .svc-card:hover::before { transform: scaleX(1); }
+  .svc-idx { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-3); margin-bottom: 24px; }
+  .svc-name { font-family: var(--font-display); font-size: 29px; font-weight: 400; margin-bottom: 7px; }
+  .svc-tag { font-size: 14px; color: var(--text-2); margin-bottom: 20px; }
+  .svc-price { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--silver); }
+  .svc-arrow { position: absolute; bottom: 46px; right: 46px; font-family: var(--font-mono); font-size: 20px; color: var(--text-3); transition: color 0.2s, transform 0.2s; }
+  .svc-card:hover .svc-arrow { color: var(--silver); transform: translate(4px,-4px); }
+
+  .process-strip { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 76px 0; }
+  .process-inner { display: flex; gap: 70px; align-items: flex-start; }
+  .process-col { flex-shrink: 0; width: 170px; }
+  .process-steps { display: flex; flex: 1; }
+  .process-step { flex: 1; padding: 0 32px; border-left: 1px solid var(--border); }
+  .process-num { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-3); margin-bottom: 12px; }
+  .process-title { font-family: var(--font-display); font-size: 21px; font-weight: 400; margin-bottom: 9px; }
+  .process-desc { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+
+  .creds { padding: 110px 0; border-top: 1px solid var(--border); }
+  .creds-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; align-items: center; }
+  .creds-inner h2 { font-family: var(--font-display); font-size: clamp(34px,4vw,52px); font-weight: 300; line-height: 1.1; margin-bottom: 18px; }
+  .creds-inner h2 em { font-style: italic; color: var(--text-2); }
+  .creds-inner p { color: var(--text-2); font-size: 15px; line-height: 1.75; margin-bottom: 30px; }
+  .cred-list { list-style: none; }
+  .cred-list li { display: flex; align-items: center; gap: 13px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--text-2); padding: 13px 0; border-bottom: 1px solid var(--border); }
+  .cred-list li::before { content: ''; display: block; width: 6px; height: 6px; border: 1px solid var(--silver); transform: rotate(45deg); flex-shrink: 0; }
+
+  /* ════════════════════════
+     SERVICES PAGE
+  ════════════════════════ */
+  .pg-hero { padding: 154px 60px 76px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+  .pg-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 100% 50%, rgba(180,180,176,0.03) 0%, transparent 70%); pointer-events: none; }
+  .pg-hero h1 { font-family: var(--font-display); font-size: clamp(50px,7vw,94px); font-weight: 300; line-height: 0.95; letter-spacing: -0.02em; max-width: 720px; margin-bottom: 26px; }
+  .pg-hero h1 em { font-style: italic; color: var(--text-2); }
+  .pg-hero p { max-width: 460px; color: var(--text-2); font-size: 15px; line-height: 1.7; }
+
+  .tiers { padding: 76px 0; }
+  .tier-card { border: 1px solid var(--border); margin-bottom: 2px; position: relative; transition: border-color 0.3s; }
+  .tier-card:hover { border-color: var(--border-light); }
+  .tier-card.featured { border-color: rgba(200,200,196,0.2); }
+  .tier-card.featured::after { content: 'Most Popular'; position: absolute; top: 30px; right: 46px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--silver); background: var(--silver-dim); padding: 5px 13px; border: 1px solid rgba(200,200,196,0.2); }
+  .tier-inner { display: grid; grid-template-columns: 290px 1fr 210px; align-items: start; padding: 52px 46px; gap: 52px; }
+  .tier-name { font-family: var(--font-display); font-size: 34px; font-weight: 400; line-height: 1.1; margin-bottom: 4px; }
+  .tier-type { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 16px; }
+  .tier-desc { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+  .tier-list { list-style: none; }
+  .tier-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 14px; color: var(--text-2); padding: 9px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .tier-list li:last-child { border-bottom: none; }
+  .tier-list li::before { content: '→'; font-family: var(--font-mono); font-size: 11px; color: var(--silver); flex-shrink: 0; margin-top: 1px; }
+  .tier-right { display: flex; flex-direction: column; align-items: flex-end; gap: 22px; }
+  .tier-amt { font-family: var(--font-display); font-size: 42px; font-weight: 300; line-height: 1; color: var(--silver-bright); text-align: right; }
+  .tier-period { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--text-3); margin-top: 3px; text-align: right; }
+
+  .bundles { padding: 76px 0; border-top: 1px solid var(--border); }
+  .bundles h2 { font-family: var(--font-display); font-size: clamp(32px,4vw,52px); font-weight: 300; line-height: 1.1; margin-top: 36px; }
+  .bundles h2 em { font-style: italic; color: var(--text-2); }
+  .bundles-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); margin-top: 52px; }
+  .bundle { background: var(--bg); padding: 38px; transition: background 0.3s; }
+  .bundle:hover { background: var(--surface); }
+  .bundle-num { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-3); margin-bottom: 16px; }
+  .bundle-name { font-family: var(--font-display); font-size: 25px; font-weight: 400; margin-bottom: 5px; }
+  .bundle-svcs { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--silver); text-transform: uppercase; margin-bottom: 13px; }
+  .bundle-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+  /* ════════════════════════
+     ABOUT PAGE
+  ════════════════════════ */
+  .about-hero { padding: 154px 60px 76px; position: relative; overflow: hidden; }
+  .about-hero-grid { display: grid; grid-template-columns: 1fr; max-width: 800px; margin: 0 auto; }
+  .about-hero h1 { font-family: var(--font-display); font-size: clamp(48px,6.5vw,86px); font-weight: 300; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 28px; }
+  .about-hero h1 em { font-style: italic; color: var(--text-2); }
+  .about-hero-p { color: var(--text-2); font-size: 15px; line-height: 1.75; max-width: 480px; }
+  .about-photo { background: var(--surface); border: 1px solid var(--border); aspect-ratio: 4/5; display: flex; align-items: center; justify-content: center; }
+  .about-photo span { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-3); text-transform: uppercase; }
+
+  .about-body { padding: 76px 0; border-top: 1px solid var(--border); }
+  .about-body-grid { display: grid; grid-template-columns: 170px 1fr; gap: 76px; }
+  .about-content h2 { font-family: var(--font-display); font-size: 34px; font-weight: 300; line-height: 1.15; margin-bottom: 18px; }
+  .about-content p { font-size: 15px; color: var(--text-2); line-height: 1.8; margin-bottom: 16px; max-width: 600px; }
+
+  .competencies { margin-top: 68px; padding-top: 68px; border-top: 1px solid var(--border); }
+  .comp-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); margin-top: 38px; }
+  .comp-card { background: var(--bg); padding: 30px; }
+  .comp-cat { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--silver); margin-bottom: 14px; }
+  .comp-list { list-style: none; }
+  .comp-list li { font-size: 13px; color: var(--text-2); padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .comp-list li:last-child { border-bottom: none; }
+
+  .holding-section { padding: 76px 0; border-top: 1px solid var(--border); }
+  .holding-section h2 { font-family: var(--font-display); font-size: clamp(32px,4vw,48px); font-weight: 300; line-height: 1.1; margin-bottom: 9px; }
+  .holding-section h2 em { font-style: italic; color: var(--text-2); }
+  .holding-section p { color: var(--text-2); font-size: 14px; max-width: 460px; }
+  .holding-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); margin-top: 46px; }
+  .holding-card { background: var(--bg); padding: 38px; position: relative; transition: background 0.3s; }
+  .holding-card:hover { background: var(--surface); }
+  .holding-card.active { background: var(--surface); }
+  .holding-card.active::before { content: 'Current Focus'; position: absolute; top: 38px; right: 38px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--silver); }
+  .holding-ent { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 13px; }
+  .holding-name { font-family: var(--font-display); font-size: 23px; font-weight: 400; margin-bottom: 7px; }
+  .holding-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+  /* ════════════════════════
+     CONTACT PAGE
+  ════════════════════════ */
+  .contact-wrap { padding: 154px 0 76px; }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 96px; padding-bottom: 76px; border-bottom: 1px solid var(--border); align-items: start; }
+  .contact-left h1 { font-family: var(--font-display); font-size: clamp(44px,5.5vw,74px); font-weight: 300; line-height: 1.0; letter-spacing: -0.02em; margin-bottom: 26px; }
+  .contact-left h1 em { font-style: italic; color: var(--text-2); }
+  .contact-left p { font-size: 15px; color: var(--text-2); line-height: 1.75; margin-bottom: 40px; max-width: 340px; }
+  .contact-info { list-style: none; }
+  .contact-info li { display: flex; align-items: flex-start; gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .ci-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--text-3); width: 76px; flex-shrink: 0; padding-top: 2px; }
+  .ci-val { font-size: 14px; color: var(--text-2); }
+
+  .cform { display: flex; flex-direction: column; }
+  .fg { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); transition: border-color 0.2s; }
+  .fg:first-child { border-top: 1px solid var(--border); }
+  .fg:focus-within { border-color: var(--silver); }
+  .fg label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--text-3); padding: 15px 0 4px; transition: color 0.2s; }
+  .fg:focus-within label { color: var(--silver); }
+  .fg input, .fg select, .fg textarea { background: transparent; border: none; outline: none; font-family: var(--font-body); font-size: 15px; font-weight: 300; color: var(--text); padding: 7px 0 14px; resize: none; }
+  .fg select option { background: #0c0c0e; color: var(--text); }
+  .fg textarea { min-height: 88px; }
+  .form-foot { margin-top: 26px; display: flex; align-items: center; justify-content: space-between; }
+  .form-note { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-3); }
+
+  .cal-cta { margin-top: 68px; padding: 68px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 36px; position: relative; overflow: hidden; transition: border-color 0.3s; }
+  .cal-cta:hover { border-color: var(--border-light); }
+  .cal-cta::before { content: ''; position: absolute; top: 0; left: 0; width: 38%; height: 1px; background: linear-gradient(90deg, var(--silver), transparent); }
+  .cal-cta h3 { font-family: var(--font-display); font-size: 32px; font-weight: 300; margin-bottom: 5px; }
+  .cal-cta p { font-size: 14px; color: var(--text-2); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .container, .hero, .pg-hero, .about-hero, .contact-wrap .container { padding-left: 20px; padding-right: 20px; }
+    .hero { padding-top: 110px; }
+    .hero-foot { flex-direction: column; align-items: flex-start; }
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+    .stat-item:nth-child(2) { border-right: none; }
+    .svc-grid { grid-template-columns: 1fr; }
+    .process-inner { flex-direction: column; }
+    .process-steps { flex-direction: column; }
+    .process-step { border-left: none; border-top: 1px solid var(--border); padding: 20px 0; }
+    .creds-inner { grid-template-columns: 1fr; gap: 52px; }
+    .tier-inner { grid-template-columns: 1fr; gap: 24px; }
+    .tier-right { align-items: flex-start; }
+    .bundles-grid { grid-template-columns: 1fr; }
+    .about-hero-grid { grid-template-columns: 1fr; }
+    .about-photo { display: none; }
+    .about-body-grid { grid-template-columns: 1fr; gap: 28px; }
+    .comp-grid { grid-template-columns: 1fr; }
+    .holding-grid { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; gap: 52px; }
+    .cal-cta { flex-direction: column; align-items: flex-start; padding: 36px 24px; }
+    footer { padding: 36px 20px; flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#home" class="nav-logo">
+    <img src="./Black_lotus_logo.png" alt="Black Lotus" />
+    <span class="nav-logo-text">Black Lotus <span>UX</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="https://calendly.com/chootung/30min" target="_blank" rel="noopener" class="nav-cta">Book a Call →</a>
+</nav>
+
+
+<!-- ════════════════ HOME ════════════════ -->
+<div id="home" class="page">
+
+  <div class="hero">
+    <svg class="hero-lotus" viewBox="0 0 700 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M350 640C350 640 85 468 85 268C85 128 202 58 350 58C498 58 615 128 615 268C615 468 350 640 350 640Z" stroke="white" stroke-width="1.2" fill="none"/>
+      <path d="M350 555C350 555 145 405 145 268C145 158 234 104 350 104C466 104 555 158 555 268C555 405 350 555 350 555Z" stroke="white" stroke-width="1.2" fill="none"/>
+      <path d="M350 465C350 465 205 368 205 268C205 182 268 136 350 136C432 136 495 182 495 268C495 368 350 465 350 465Z" stroke="white" stroke-width="1.2" fill="none"/>
+      <circle cx="350" cy="268" r="24" stroke="white" stroke-width="1.2" fill="none"/>
+    </svg>
+    <div class="hero-eyebrow">Black Lotus Holdings — UX Division</div>
+    <h1 class="hero-h1">Intelligence<br/>that <em>moves</em><br/>products.</h1>
+    <div class="hero-rule"></div>
+    <div class="hero-foot">
+      <p class="hero-desc">AI-powered UX audits, competitor intelligence, synthetic user research, and design systems — built for companies ready to compete at the highest level.</p>
+      <div class="hero-btns">
+        <a href="#services" class="btn-primary">Explore Services →</a>
+        <a href="https://calendly.com/chootung/30min" target="_blank" rel="noopener" class="btn-ghost">Book Discovery Call</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-number" style="font-size:32px;line-height:1.3;">Expert</div>
+      <div class="stat-label">UX Experience</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">100</div>
+      <div class="stat-label">Synthetic Personas Per Test</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">4</div>
+      <div class="stat-label">Service Tiers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">48<sup>h</sup></div>
+      <div class="stat-label">Avg. First Report Turnaround</div>
+    </div>
+  </div>
+
+  <section class="svc-preview">
+    <div class="container">
+      <div class="svc-header">
+        <h2 class="svc-title">Four ways to<br/><em>work together</em></h2>
+        <a href="#services" class="btn-ghost">View all services →</a>
+      </div>
+      <div class="svc-grid">
+        <a href="#services" class="svc-card">
+          <div class="svc-idx">01 / Retainer</div>
+          <div class="svc-name">UX Pulse</div>
+          <div class="svc-tag">Monthly usability sweeps + competitor research</div>
+          <div class="svc-price">From $2,500 / month</div>
+          <div class="svc-arrow">↗</div>
+        </a>
+        <a href="#services" class="svc-card">
+          <div class="svc-idx">02 / Retainer</div>
+          <div class="svc-name">UX Intelligence</div>
+          <div class="svc-tag">Pulse + quarterly AI-powered user testing at scale</div>
+          <div class="svc-price">From $4,500 / month</div>
+          <div class="svc-arrow">↗</div>
+        </a>
+        <a href="#services" class="svc-card">
+          <div class="svc-idx">03 / Retainer</div>
+          <div class="svc-name">Full Stack UX</div>
+          <div class="svc-tag">Complete UX intelligence + living design system</div>
+          <div class="svc-price">From $8,000 / month</div>
+          <div class="svc-arrow">↗</div>
+        </a>
+        <a href="#services" class="svc-card">
+          <div class="svc-idx">04 / Project</div>
+          <div class="svc-name">Design System Sprint</div>
+          <div class="svc-tag">Deep Figma audit + full system build or rebuild</div>
+          <div class="svc-price">$8,000 – $18,000 flat</div>
+          <div class="svc-arrow">↗</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="process-strip">
+    <div class="container">
+      <div class="process-inner">
+        <div class="process-col"><div class="section-label">How it works</div></div>
+        <div class="process-steps">
+          <div class="process-step">
+            <div class="process-num">01</div>
+            <div class="process-title">Crawl & Scan</div>
+            <div class="process-desc">AI agents crawl your product, flagging WCAG violations, broken flows, and performance issues automatically.</div>
+          </div>
+          <div class="process-step">
+            <div class="process-num">02</div>
+            <div class="process-title">Simulate & Test</div>
+            <div class="process-desc">100 synthetic user personas run through your flows, exposing friction without recruitment overhead.</div>
+          </div>
+          <div class="process-step">
+            <div class="process-num">03</div>
+            <div class="process-title">Synthesize & Report</div>
+            <div class="process-desc">Findings become structured PDF reports and Figma flowcharts — reviewed by an expert UX designer.</div>
+          </div>
+          <div class="process-step">
+            <div class="process-num">04</div>
+            <div class="process-title">Iterate & Maintain</div>
+            <div class="process-desc">Monthly cadence keeps your UX intelligence current as your product and competition evolve.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="creds">
+    <div class="container">
+      <div class="creds-inner">
+        <div>
+          <div class="section-label">Credentials</div>
+          <h2>Expert UX craft,<br/><em>agent-scale</em> output.</h2>
+          <p>Founded by Adriel Choo — Design System Lead, Fortune 500 veteran, and expert UX designer. Black Lotus UX combines enterprise-level design operations experience with a self-hosted AI agent infrastructure, delivering research and reporting quality that rivals a full in-house team without the overhead.</p>
+          <a href="#about" class="btn-ghost">About the founder →</a>
+        </div>
+        <ul class="cred-list">
+          <li>Expert Senior UX — mobile, web, and enterprise products</li>
+          <li>Design Systems architecture at enterprise scale</li>
+          <li>DesignOps — release cycle optimization & cross-functional delivery</li>
+          <li>Team leadership, mentorship & design excellence programs</li>
+          <li>User research & data-driven product roadmap influence</li>
+          <li>WCAG 2.1 / 2.2 accessibility expertise</li>
+          <li>AI-augmented research — 100-persona synthetic user testing</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="./Black_lotus_logo.png" alt="Black Lotus" />
+      <div><div class="footer-name">Black Lotus UX</div><div class="footer-sub">A Black Lotus Holdings Company</div></div>
+    </div>
+    <div class="footer-links">
+      <a href="#home">Home</a><a href="#services">Services</a><a href="#about">About</a><a href="#contact">Contact</a>
+    </div>
+    <div class="footer-copy">© 2025 Black Lotus Holdings LLC</div>
+  </footer>
+</div>
+
+
+<!-- ════════════════ SERVICES ════════════════ -->
+<div id="services" class="page">
+  <div class="pg-hero">
+    <div class="pg-hero-bg"></div>
+    <div class="container">
+      <div class="section-label">Services</div>
+      <h1>Built for companies<br/>that take UX <em>seriously.</em></h1>
+      <p>Four tiers of AI-augmented UX intelligence. Every report is agent-generated and expert-designer reviewed — no fluff, no filler.</p>
+    </div>
+  </div>
+
+  <section class="tiers">
+    <div class="container">
+      <div class="tier-card">
+        <div class="tier-inner">
+          <div>
+            <div class="tier-type">01 — Monthly Retainer</div>
+            <div class="tier-name">UX Pulse</div>
+            <div class="tier-desc">Your product's vital signs, monthly. Usability sweeps catch accessibility and flow issues before users do. Competitor research tracks what the field is doing so you can stay ahead.</div>
+          </div>
+          <ul class="tier-list">
+            <li>Monthly site usability sweep — WCAG 2.1/2.2 audit, broken flow detection, CLS/LCP flags</li>
+            <li>Competitor research on 3–5 defined competitors — UX changes, new features, positioning shifts</li>
+            <li>PDF report with prioritized callouts and actionable recommendations</li>
+            <li>Figma user flow diagrams for flagged competitor patterns</li>
+            <li>Async review call (30 min) to walk through findings</li>
+          </ul>
+          <div class="tier-right">
+            <div><div class="tier-amt">$2,500–3,500</div><div class="tier-period">per month</div></div>
+            <a href="#contact" class="btn-primary">Get started →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tier-card featured">
+        <div class="tier-inner">
+          <div>
+            <div class="tier-type">02 — Monthly Retainer</div>
+            <div class="tier-name">UX Intelligence</div>
+            <div class="tier-desc">Everything in UX Pulse, plus quarterly AI user testing with 100 synthetic personas. Real behavioral data — without the cost or timeline of traditional user research.</div>
+          </div>
+          <ul class="tier-list">
+            <li>Everything in UX Pulse, monthly</li>
+            <li>Quarterly AI user testing — 100 personas matched to your ICP, simulated across key flows</li>
+            <li>Task success rates, drop-off mapping, and friction heatmaps per user flow</li>
+            <li>Quarterly research PDF report with behavioral findings and design recommendations</li>
+            <li>Monthly + quarterly reports delivered as shareable Figma documents</li>
+            <li>Live review call (60 min) each quarter to discuss testing outcomes</li>
+          </ul>
+          <div class="tier-right">
+            <div><div class="tier-amt">$4,500–6,500</div><div class="tier-period">per month</div></div>
+            <a href="#contact" class="btn-primary">Get started →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tier-card">
+        <div class="tier-inner">
+          <div>
+            <div class="tier-type">03 — Monthly Retainer</div>
+            <div class="tier-name">Full Stack UX</div>
+            <div class="tier-desc">The complete picture. Full ongoing intelligence plus a living design system maintained and evolved based on real product findings each month.</div>
+          </div>
+          <ul class="tier-list">
+            <li>Everything in UX Intelligence, monthly + quarterly</li>
+            <li>Design system audit — Figma component gap analysis, token inconsistency flags, undocumented patterns</li>
+            <li>Monthly design system health report — what changed, what needs attention</li>
+            <li>Ongoing Figma component updates based on audit and research findings</li>
+            <li>Design system documentation maintained and version-tracked</li>
+            <li>Priority async support — feedback within 24 hours on design system questions</li>
+          </ul>
+          <div class="tier-right">
+            <div><div class="tier-amt">$8,000–12,000</div><div class="tier-period">per month</div></div>
+            <a href="#contact" class="btn-primary">Get started →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tier-card">
+        <div class="tier-inner">
+          <div>
+            <div class="tier-type">04 — Fixed Project</div>
+            <div class="tier-name">Design System Sprint</div>
+            <div class="tier-desc">A focused 3–4 week engagement. We audit your existing Figma files, identify every gap, then build or rebuild the system from the ground up — with full documentation.</div>
+          </div>
+          <ul class="tier-list">
+            <li>Deep Figma file audit — component inventory, token analysis, pattern inconsistency mapping</li>
+            <li>AI user testing to validate which components carry the most interaction weight</li>
+            <li>Full component library build or rebuild based on audit findings</li>
+            <li>Typography, color, spacing, and elevation token system</li>
+            <li>Component documentation with usage guidelines and variant rationale</li>
+            <li>Handoff-ready Figma file + written design system documentation</li>
+          </ul>
+          <div class="tier-right">
+            <div><div class="tier-amt">$8k–18k</div><div class="tier-period">flat project rate</div></div>
+            <a href="#contact" class="btn-primary">Get started →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bundles">
+    <div class="container">
+      <div class="section-label">Bundled Value</div>
+      <h2>Services that <em>compound</em><br/>when paired together.</h2>
+      <div class="bundles-grid">
+        <div class="bundle">
+          <div class="bundle-num">Bundle 01</div>
+          <div class="bundle-name">UX Pulse</div>
+          <div class="bundle-svcs">Sweeps + Competitor Research</div>
+          <div class="bundle-desc">One lens on your own product, another on what competitors are doing better. Together they form a complete monthly competitive UX picture.</div>
+        </div>
+        <div class="bundle">
+          <div class="bundle-num">Bundle 02</div>
+          <div class="bundle-name">UX Foundation</div>
+          <div class="bundle-svcs">User Testing + Design System</div>
+          <div class="bundle-desc">Testing data informs the system. We run personas first, identify behavioral patterns and pain points, then build your design system around real user evidence — not assumptions.</div>
+        </div>
+        <div class="bundle">
+          <div class="bundle-num">Bundle 03</div>
+          <div class="bundle-name">Full Stack UX</div>
+          <div class="bundle-svcs">All Four Services</div>
+          <div class="bundle-desc">The complete operating layer. Ongoing intelligence, research, and a design system that evolves with your product. For teams ready to embed UX rigor into their growth engine.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="./Black_lotus_logo.png" alt="Black Lotus" />
+      <div><div class="footer-name">Black Lotus UX</div><div class="footer-sub">A Black Lotus Holdings Company</div></div>
+    </div>
+    <div class="footer-links">
+      <a href="#home">Home</a><a href="#services">Services</a><a href="#about">About</a><a href="#contact">Contact</a>
+    </div>
+    <div class="footer-copy">© 2025 Black Lotus Holdings LLC</div>
+  </footer>
+</div>
+
+
+<!-- ════════════════ ABOUT ════════════════ -->
+<div id="about" class="page">
+  <section class="about-hero">
+    <div class="about-hero-grid">
+      <div>
+        <div class="section-label">About</div>
+        <h1>Expert UX craft.<br/><em>Autonomous</em><br/>intelligence.</h1>
+        <p class="about-hero-p">Founded by Adriel Choo, a Design System Lead with Fortune 500 experience. Black Lotus UX exists to give growth-stage companies access to the research cadence, audit discipline, and design system rigor that separates high-performing UX teams from the rest.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-body">
+    <div class="container">
+      <div class="about-body-grid">
+        <div><div class="section-label">The Founder</div></div>
+        <div class="about-content">
+          <h2>Adriel Choo —<br/><em>Founding Designer.</em></h2>
+          <p>I've spent my career at the intersection of digital design and business outcome — most recently as a Design System Lead at a Fortune 500 company, where I saw firsthand what happens when UX is treated as a strategic pillar rather than a production function.</p>
+          <p>What I observed was consistent: companies without a standardized research and audit cadence struggled to make data-driven design decisions. Without that foundation, UX teams can't effectively tie their work to business outcomes — and leadership stops listening. I fixed that. I streamlined the UX department, established Figma and design systems as organizational infrastructure, and built processes that gave the team a clear, unified voice in product decisions.</p>
+          <p>The results were measurable — increased revenue, stronger design consistency, and a brand experience customers actually noticed. Black Lotus UX exists to bring that same operating model to growth-stage companies that haven't had access to it yet.</p>
+
+          <div class="competencies">
+            <div class="section-label">Core Competencies</div>
+            <div class="comp-grid">
+              <div class="comp-card">
+                <div class="comp-cat">UX Strategy</div>
+                <ul class="comp-list">
+                  <li>UX Strategy & product vision</li>
+                  <li>Multi-platform product releases</li>
+                  <li>Cross-functional stakeholder mgmt</li>
+                  <li>WCAG 2.1 / 2.2 accessibility</li>
+                </ul>
+              </div>
+              <div class="comp-card">
+                <div class="comp-cat">DesignOps & Leadership</div>
+                <ul class="comp-list">
+                  <li>Design systems (schema/structure)</li>
+                  <li>Release cycle optimization</li>
+                  <li>Team mentorship & excellence</li>
+                  <li>Design–Product–Eng alignment</li>
+                </ul>
+              </div>
+              <div class="comp-card">
+                <div class="comp-cat">Research & Infrastructure</div>
+                <ul class="comp-list">
+                  <li>AI synthetic user testing</li>
+                  <li>Competitor UX intelligence</li>
+                  <li>n8n + CrewAI orchestration</li>
+                  <li>Figma API integrations</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="holding-section">
+    <div class="container">
+      <div class="section-label">Black Lotus Holdings</div>
+      <h2>Three companies.<br/><em>One holding structure.</em></h2>
+      <p>Black Lotus UX operates alongside two sister companies under Black Lotus Holdings LLC.</p>
+      <div class="holding-grid">
+        <div class="holding-card active">
+          <div class="holding-ent">Entity 01</div>
+          <div class="holding-name">Black Lotus UX</div>
+          <div class="holding-desc">AI-powered UX auditing, competitor intelligence, synthetic user research, and design systems for growth-stage digital companies.</div>
+        </div>
+        <div class="holding-card">
+          <div class="holding-ent">Entity 02</div>
+          <div class="holding-name">Black Lotus Leather</div>
+          <div class="holding-desc">Custom leather goods — handcrafted, made-to-order accessories and small goods.</div>
+        </div>
+        <div class="holding-card">
+          <div class="holding-ent">Entity 03</div>
+          <div class="holding-name">BL Trading</div>
+          <div class="holding-desc">Algorithmic trading infrastructure. Self-hosted bot operations for systematic market strategies.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="./Black_lotus_logo.png" alt="Black Lotus" />
+      <div><div class="footer-name">Black Lotus UX</div><div class="footer-sub">A Black Lotus Holdings Company</div></div>
+    </div>
+    <div class="footer-links">
+      <a href="#home">Home</a><a href="#services">Services</a><a href="#about">About</a><a href="#contact">Contact</a>
+    </div>
+    <div class="footer-copy">© 2025 Black Lotus Holdings LLC</div>
+  </footer>
+</div>
+
+
+<!-- ════════════════ CONTACT ════════════════ -->
+<div id="contact" class="page">
+  <div class="contact-wrap">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="contact-left">
+          <div class="section-label">Contact</div>
+          <h1>Let's talk<br/><em>about your product.</em></h1>
+          <p>Discovery calls are 30 minutes. We'll map where your UX is costing you and which service tier fits your current stage. No pitch decks, no pressure.</p>
+          <ul class="contact-info">
+            <li><span class="ci-label">Email</span><span class="ci-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="92faf7fefefdd2f0fef3f1f9fefde6e7e1e7eabcf1fdff">[email&#160;protected]</a></span></li>
+            <li><span class="ci-label">Based in</span><span class="ci-val">United States — Remote-first, serving clients globally</span></li>
+            <li><span class="ci-label">Response</span><span class="ci-val">Within 24 hours on business days</span></li>
+            <li><span class="ci-label">Availability</span><span class="ci-val">Now accepting new clients</span></li>
+          </ul>
+        </div>
+
+        <div class="cform">
+          <div class="fg"><label>Your name</label><input type="text" placeholder="First and last name" /></div>
+          <div class="fg"><label>Company</label><input type="text" placeholder="Company name" /></div>
+          <div class="fg"><label>Email</label><input type="email" placeholder="work@company.com" /></div>
+          <div class="fg">
+            <label>Service interest</label>
+            <select>
+              <option value="" disabled selected>Select a tier</option>
+              <option>UX Pulse — $2,500–3,500/mo</option>
+              <option>UX Intelligence — $4,500–6,500/mo</option>
+              <option>Full Stack UX — $8,000–12,000/mo</option>
+              <option>Design System Sprint — Project</option>
+              <option>Not sure yet — let's talk</option>
+            </select>
+          </div>
+          <div class="fg"><label>Tell me about your product</label><textarea placeholder="Brief description — what you're building, your current UX pain points, and what success looks like for you."></textarea></div>
+          <div class="form-foot">
+            <span class="form-note">No commitment. No spam.</span>
+            <button class="btn-primary">Send Message →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cal-cta">
+        <div>
+          <h3>Prefer to jump straight to a call?</h3>
+          <p>Book a 30-minute discovery call directly on the calendar.</p>
+        </div>
+        <!-- Replace # with your Calendly URL when ready -->
+        <a href="https://calendly.com/chootung/30min" target="_blank" rel="noopener" class="btn-primary">Book via Calendar →</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="./Black_lotus_logo.png" alt="Black Lotus" />
+      <div><div class="footer-name">Black Lotus UX</div><div class="footer-sub">A Black Lotus Holdings Company</div></div>
+    </div>
+    <div class=
