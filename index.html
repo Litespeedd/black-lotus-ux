@@ -734,20 +734,20 @@
           <h1>Let's talk<br/><em>about your product.</em></h1>
           <p>Discovery calls are 30 minutes. We'll map where your UX is costing you and which service tier fits your current stage. No pitch decks, no pressure.</p>
           <ul class="contact-info">
-            <li><span class="ci-label">Email</span><span class="ci-val">hello@blacklotusux.com</span></li>
+            <li><span class="ci-label">Email</span><span class="ci-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d5bdb0b9b9ba95b7b9b4b6beb9baa1a0a6a0adfbb6bab8">[email&#160;protected]</a></span></li>
             <li><span class="ci-label">Based in</span><span class="ci-val">United States — Remote-first, serving clients globally</span></li>
             <li><span class="ci-label">Response</span><span class="ci-val">Within 24 hours on business days</span></li>
             <li><span class="ci-label">Availability</span><span class="ci-val">Now accepting new clients</span></li>
           </ul>
         </div>
 
-        <div class="cform">
-          <div class="fg"><label>Your name</label><input type="text" placeholder="First and last name" /></div>
-          <div class="fg"><label>Company</label><input type="text" placeholder="Company name" /></div>
-          <div class="fg"><label>Email</label><input type="email" placeholder="work@company.com" /></div>
+        <form class="cform" action="https://formspree.io/f/xpqydnle" method="POST">
+          <div class="fg"><label>Your name</label><input type="text" name="name" placeholder="First and last name" required /></div>
+          <div class="fg"><label>Company</label><input type="text" name="company" placeholder="Company name" /></div>
+          <div class="fg"><label>Email</label><input type="email" name="email" placeholder="work@company.com" required /></div>
           <div class="fg">
             <label>Service interest</label>
-            <select>
+            <select name="service">
               <option value="" disabled selected>Select a tier</option>
               <option>UX Pulse — $2,500–3,500/mo</option>
               <option>UX Intelligence — $4,500–6,500/mo</option>
@@ -756,12 +756,12 @@
               <option>Not sure yet — let's talk</option>
             </select>
           </div>
-          <div class="fg"><label>Tell me about your product</label><textarea placeholder="Brief description — what you're building, your current UX pain points, and what success looks like for you."></textarea></div>
+          <div class="fg"><label>Tell me about your product</label><textarea name="message" placeholder="Brief description — what you're building, your current UX pain points, and what success looks like for you."></textarea></div>
           <div class="form-foot">
             <span class="form-note">No commitment. No spam.</span>
-            <button class="btn-primary">Send Message →</button>
+            <button type="submit" class="btn-primary">Send Message →</button>
           </div>
-        </div>
+        </form>
       </div>
 
       <div class="cal-cta">
@@ -778,6 +778,4 @@
   <footer>
     <div class="footer-brand">
       <img src="./Black_lotus_logo.png" alt="Black Lotus" />
-      <div><div class="footer-name">Black Lotus UX</div><div class="footer-sub">A Black Lotus Holdings Company</div></div>
-    </div>
-    <div class=
+      <div><div class="f
